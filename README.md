@@ -11,6 +11,7 @@
 - To run a container you need an **image**
 - **Podman** can automatically fetch a base image when building a custom image
 - To build a custom image, first create a file called `Containerfile` or `Dockerfile`containing building instructions
+- Works with **pods** that collections of containers
 
 ## Running a Sample Test Container
 
@@ -81,3 +82,34 @@
 - If this is the first connection added, then it will be set to the default
 - `podman system connection list # shows your connections`
 - `podman system connection --help`
+
+## Create a simple container
+
+- `sudo podman run hello-world # where hello-world is the container name`
+- `sudo podman pull ubuntu:20.04 # pulls an ubuntu version 20.04 image from the default repo`
+- `sudo podman ps -a # shows all containers including stopped`
+- `sudo podman images # shows all images downloaded`
+- `sudo podman run -it --rm ubuntu:20.04 /bin/bash # runs an interactive shell: '-it' and removes it after exit '--rm' using a bash shell '/bin/bash'`
+- `sudo podman stop <container_ID> # stops the container`
+- `sudo podman pod create --name <pod_name> # creates a pod`
+- `sudo podman run -d --pod <pod_name> <container> # '-d' to run in a detached mode so it runs itself, <container> such as nginx will be created and ran inside the pod`
+- `sudo podman pull <repository> # docker.io/library/<image>:<version> where <version> can be latest`
+- Other repos: `registry.redhat.io/`, `quay.io/`
+
+### Have a container start with system
+
+- `sudo nano /etc/systemd/system/<file_name>.service`
+- Example content of the file:
+```
+[Unit]
+Description=<description>
+
+[Service]
+ExecStart=/usr/bin/podman run -d --name <container_name> <image>
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+```
+- `sudo systemctl enable <file_name>.service # enable the file to be run as a service`
+- `sudo systemctl start <file_name>.service # starts the service`
