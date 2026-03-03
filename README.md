@@ -49,3 +49,35 @@
 ### Removing the container
 
 - `podman rm <container_id>`
+
+## Podman with a Custom Linux VM or external Linux System
+
+- The core **Podman** runtime environment can only run on Linux operating systems
+- The remote client uses a client-server model
+- A **SSH Daemon** needs to be running because executing a **Podman** command connects to a server via **SSH**
+  - then it connects to the **Podman** service using **systemd** socket activation
+
+### Creating the first connection
+
+- Must enable `podman.sock` SystemD service on Linux server
+- `systemctl --user enable --now podman.socket # enable and start socket permanently`
+- Enable `linger` for the user in order for the socket to work when the user is not logged in
+  - `sudo loginctl enable-linger $USER`
+  - `podman --remote info # verify the socket is listening`
+
+#### Enable sshd
+
+- `sudo systemctl enable --new sshd # enable and start SSH daemon`
+
+#### Setting up SSH
+
+- `ssh-keygen # generate SSH keys for client and server communication`
+- The public key by default should be in `home` directory under `.ssh\id_rsa.pub`
+- `cp id_rsa.pub ~/.ssh/authorized_keys # copy the public key on the Linux server`
+
+### Using the client
+
+- `C:\Users\parad0x763> podman system connection addd parad0x763 --identity C:\Users\parad0x763\.shh\id_rsa ssh://192.168.122.1/run/user # add a connection`
+- If this is the first connection added, then it will be set to the default
+- `podman system connection list # shows your connections`
+- `podman system connection --help`
