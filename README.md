@@ -12,12 +12,50 @@
 - **Podman** can automatically fetch a base image when building a custom image
 - To build a custom image, first create a file called `Containerfile` or `Dockerfile`containing building instructions
 - Works with **pods** that collections of containers
+- Default container registries: [quay.io](https://quay.io/?ref=devopscube.com), [docker.io](https://hub.docker.com/?ref=devopscube.com)
+
+### Logging into private container images
+
+- `podman login docker.io # log into docker hub`
+
+### Pulling Images
+
+- By default **podman** searches for images in `quay.io` first then in `docker.io`, so it is better to be explicit
+- `podman pull docker.io/nginx`
+- `podman pull quay.io/quay/busybox`
 
 ## Running a Sample Test Container
 
 - A sample container that is build with Nginx that only serves an index page
 - `podman run --name basic_httpd -d -p 8080:80/tcp docker.io/nginx`
+- `sudo podman port -l # shows the port being used, for this command you see: 80/tcp -> 0.0.0.0:8080`
+- `sudo podman inspect -l # inspects the container`
 - Use **Podman** `ps` command to list creating and running containers
+
+## Create a Pod
+
+- `podman pod create --name <pod_name>`
+- `podman pod ls # lists pods`
+- `podman ps -a --pod # lists all containers inside a pod`
+
+### Add Containers to a Pod
+
+- `podman run -dt --pod <pod_nam> <container>`
+
+### Start, Stop and Remove Containers inside a Pod
+
+- `podman start <container_id>`
+- `podman stop <container_id>`
+- `podman rm <container_id>`
+
+### Start, Stop and Delete a Pod
+
+- `podman pod stop <podname>`
+- `podman pod start <podname>`
+- To remove a pod, first stop all containers inside the pod
+  - `podman pod rm <podname>`
+- Or to forcefully remove without stopping
+  - `podman pod rm -f <podname>`
 
 ### Inspecting a running container
 
