@@ -4,6 +4,7 @@
 - [Suse-Container-Guide](https://documentation.suse.com/container/all/single-html/Container-guide/Container-guide.html)
 - [doc.podman.io/Tutorials](https://docs.podman.io/en/latest/Tutorials.html)
 - [podman_tutorial](https://github.com/containers/podman/blob/main/docs/tutorials/podman_tutorial.md)
+- [medium-running-containers](https://medium.com/@maros.kukan/running-containers-with-podman-804ca5ecc04a)
 
 ## Key Concepts
 
@@ -23,6 +24,49 @@
 - By default **podman** searches for images in `quay.io` first then in `docker.io`, so it is better to be explicit
 - `podman pull docker.io/nginx`
 - `podman pull quay.io/quay/busybox`
+
+### Namespaces
+
+- provide process isolation by creating separate instances of global system resources
+- each **namespace** provides a virtual environment, enableing processes to operate independantly within their desiganted **namespace**
+  - While sharing the underlying kernel and hardware
+
+### Control Groups ( cgroups )
+
+- Enable resource allocation and resource limiting for processes and groups of processes
+- **cgroups** allow fine-grained control over system resources
+
+### SELinux ( Security-Enhanced Linux )
+
+- Provides fine-grained access control and **Mandatory Access Control ( MAC )** policies
+- Can enhance security of containerized applications by enforcing access controls and limiting the scope of potential security breaches
+
+### Seccomp ( Secure Computing Mode )
+
+- Provides a sandboxing mechanism for restricting the system calls a process can make
+- Allows fine grained control over the system calls that containerized processes are allowed to execute
+  - reduces the attach surface and mitigating potential security risks
+
+### Container Image
+
+- lightweight, standalone, and executable package ( tar archive )
+- Contains metadata, dependencies and configurations needed to run a piece of software
+- Static snapshot of an application along with its runtime environment, libraries, and other necessary files
+
+### Container Instance
+
+- Refers to a running instance of a container based on a **container image**
+- Isolated and lightweight execution environment that runs software contained within the image
+- Multiple container instances can be created from the same **container image**
+- Each operates independantly with its own isolated resources and runtime environment
+
+### Container Runtime
+
+- Software component responsible for executing and managing containerized applications
+- Provides infrastructure to create, start, stop, and monitor containers on a host system
+- The runtime interacts with the underlying OS and Hardware to isolate and allocate recources for the container
+- Handles tasks such as networking, storage, security, and lifecycle management
+- Popular container runtimes: **Docker, runc, containerd, and CRI-O**
 
 ## Running a Sample Test Container
 
@@ -48,6 +92,29 @@
 - `podman stop <container_id>`
 - `podman rm <container_id>`
 
+### View Registries
+
+- Image registries are defined in `/etc/containers/registries.conf`
+- To add `quay.io` to the list we can use `sed`
+- `sudo sed -i 's/unqualified-search-registries = \[\(.*\)\]/unqualified-search-registries = \[\1, "quay.io"\]/' /etc/containers/registries.conf`
+
+### Confirm Default Runtime
+
+- `podman info | grep ociRuntime -A9`
+- Example output
+```
+ociRuntime:
+    name: crun
+    package: crun-1.26-3.1
+    path: /usr/bin/crun
+    version: |-
+      crun version 1.26
+      commit: 3241e671f92c33b0c003cd7de319e4f32add6231
+      rundir: /run/user/1000/crun
+      spec: 1.0.0
+      +SYSTEMD +SELINUX +APPARMOR +CAP +SECCOMP +EBPF +CRIU +LIBKRUN +YAJL
+```
+
 ### Start, Stop and Delete a Pod
 
 - `podman pod stop <podname>`
@@ -56,6 +123,10 @@
   - `podman pod rm <podname>`
 - Or to forcefully remove without stopping
   - `podman pod rm -f <podname>`
+
+### Run a Container Instance
+
+- `podman container run --rm --rmi <container_name> #  --rm and --rmi will make sure the instance and image are removed`
 
 ### Inspecting a running container
 
